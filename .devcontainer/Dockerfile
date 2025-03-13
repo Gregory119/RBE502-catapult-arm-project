@@ -47,3 +47,14 @@ RUN apt update \
     && apt install ros-jazzy-desktop -y
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+
+
+RUN mkdir root/local_dir
+WORKDIR root/local_dir
+
+
+# might need this later
+# useradd ros \
+# && apt-get install -y sudo \
+# && echo "ros ALL=\(root\) NOPASSWD:ALL" > /etc/sudoers.d/ros \
+# && chmod 0440 /etc/sudoers.d/ros
