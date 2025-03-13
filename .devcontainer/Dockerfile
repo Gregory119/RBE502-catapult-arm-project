@@ -48,6 +48,22 @@ RUN apt update \
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 
+# install colcon
+RUN apt install -y python3-colcon-common-extensions
+
+# setup auto completion
+RUN apt-get update && apt-get install -y git-core bash-completion \
+  && echo "if [ -f /opt/ros/${ROS_DISTRO}/setup.bash ]; then source /opt/ros/${ROS_DISTRO}/setup.bash; fi" >> /root/.bashrc \
+  && echo "if [ -f /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]; then source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash; fi" >> /root/.bashrc
+
+# make colcon_cd available
+RUN echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> /root/.bashrc \
+    && echo "export _colcon_cd_root=/opt/ros/jazzy/" >> /root/.bashrc
+
+# install rosdep
+RUN apt install python3-rosdep -y \
+    && rodep init \
+    && rosdep update
 
 RUN mkdir root/local_dir
 WORKDIR root/local_dir
