@@ -62,7 +62,7 @@ RUN echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> /root/.bashrc \
 
 # install rosdep
 RUN apt install python3-rosdep -y \
-    && rodep init \
+    && rosdep init \
     && rosdep update
 
 RUN mkdir root/local_dir
