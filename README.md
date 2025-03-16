@@ -45,6 +45,8 @@ docker compose up sim
 - Access the container by first opening a new shell and then run:
 
 ``` shell
+source ~/.bashrc
+docker compose start
 docker exec -it rbe-502-sim-1 bash
 ```
 The shell should have the line `root@dev:~/local_dir#`.
