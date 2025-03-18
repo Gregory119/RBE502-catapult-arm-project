@@ -64,3 +64,29 @@ You will run all your future ros2 compile commands from here (inside the docker 
 gz sim
 ```
 
+## Build
+In a shell of the container:
+
+``` shell
+cd /root/local_dir
+rosdep update && rosdep install --ignore-src --from-paths . -y
+colcon build --packages-select catapult --symlink-install
+source install/local_setup.bash
+```
+
+## Run Examples
+
+``` shell
+ros2 launch catapult ur_sim_control.launch.py
+```
+
+Move robot using test script from  `ur_robot_driver` package (if you've installed that one):
+```
+ros2 launch ur_robot_driver test_joint_trajectory_controller.launch.py
+```
+
+Example using MoveIt with simulated robot:
+```
+ros2 launch catapult ur_sim_moveit.launch.py
+
+```
