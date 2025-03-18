@@ -1,4 +1,4 @@
-FROM ubuntu:24.04 AS ros2-gazebo
+FROM ubuntu:22.04 AS ros2-gazebo
 
 ######################################################################
 # Gazebo
@@ -22,11 +22,7 @@ RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime \
   && dpkg-reconfigure --frontend noninteractive tzdata
 
 # Install gazebo
-RUN apt-get update && apt-get install -y curl lsb-release gnupg \
-    && curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null \
-    && apt-get update \
-    && apt-get install gz-harmonic -y
+RUN curl -sSL http://get.gazebosim.org | sh
 
 ENV LIBGL_ALWAYS_SOFTWARE=1
 
@@ -44,9 +40,9 @@ RUN apt install software-properties-common -y \
 # install ros 2
 RUN apt update \
     && apt upgrade -y \
-    && apt install ros-jazzy-desktop -y
+    && apt install ros-humble-desktop -y
 
-RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 
 # install colcon
 RUN apt install -y python3-colcon-common-extensions
@@ -58,12 +54,15 @@ RUN apt-get update && apt-get install -y git-core bash-completion \
 
 # make colcon_cd available
 RUN echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> /root/.bashrc \
-    && echo "export _colcon_cd_root=/opt/ros/jazzy/" >> /root/.bashrc
+    && echo "export _colcon_cd_root=/opt/ros/humble/" >> /root/.bashrc
 
 # install rosdep
 RUN apt install python3-rosdep -y \
     && rosdep init \
     && rosdep update
+
+# install particular ros2 packages
+RUN apt install ros-humble-ur-robot-driver -y
 
 RUN mkdir root/local_dir
 WORKDIR root/local_dir
