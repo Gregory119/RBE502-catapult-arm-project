@@ -42,30 +42,55 @@ RUN apt update \
     && apt upgrade -y \
     && apt install ros-humble-desktop -y
 
-RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+# add user with sudo password
+RUN useradd -m ros && echo "ros:ros" | chpasswd && adduser ros sudo
+USER ros
+ENV HOME /home/ros
+RUN echo "source /opt/ros/humble/setup.bash" >> ${HOME}/.bashrc
+USER root
 
 # install colcon
 RUN apt install -y python3-colcon-common-extensions
 
 # setup auto completion
-RUN apt-get update && apt-get install -y git-core bash-completion \
-  && echo "if [ -f /opt/ros/${ROS_DISTRO}/setup.bash ]; then source /opt/ros/${ROS_DISTRO}/setup.bash; fi" >> /root/.bashrc \
-  && echo "if [ -f /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]; then source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash; fi" >> /root/.bashrc
+USER root
+RUN apt-get update && apt-get install -y git-core bash-completion
+USER ros
+RUN echo "if [ -f /opt/ros/${ROS_DISTRO}/setup.bash ]; then source /opt/ros/${ROS_DISTRO}/setup.bash; fi" >> ${HOME}/.bashrc \
+  && echo "if [ -f /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash ]; then source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash; fi" >> ${HOME}/.bashrc
 
 # make colcon_cd available
-RUN echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> /root/.bashrc \
-    && echo "export _colcon_cd_root=/opt/ros/humble/" >> /root/.bashrc
+RUN echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> ${HOME}/.bashrc \
+    && echo "export _colcon_cd_root=/opt/ros/humble/" >> ${HOME}/.bashrc
 
 # install rosdep
-RUN apt install python3-rosdep -y \
-    && rosdep init \
-    && rosdep update
+USER root
+RUN apt install python3-rosdep -y\
+    && rosdep init
+USER ros
+RUN rosdep update
 
 # install particular ros2 packages
+USER root
 RUN apt install ros-humble-ur-robot-driver -y
 
-RUN mkdir root/local_dir
-WORKDIR root/local_dir
+######################################################################
+# Moveit related setup
+######################################################################
+# install mixin to complement colcon for building packages
+RUN apt install python3-colcon-mixin \
+    && colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml \
+    && colcon mixin update default
+
+# install vcstool
+RUN apt install python3-vcstool
+
+######################################################################
+# create directory to access host files
+######################################################################
+USER ros
+RUN mkdir ${HOME}/local_dir
+WORKDIR ${HOME}/local_dir
 
 
 # might need this later
