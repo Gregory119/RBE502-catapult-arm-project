@@ -9,16 +9,22 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(moveit_visual_tools REQUIRED)
 
 add_executable(throw src/throw.cpp)
 target_include_directories(throw PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-target_compile_features(throw PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+target_compile_features(throw PUBLIC c_std_99 cxx_std_20)  # Require C99 and C++17
 ament_target_dependencies(
   throw
-  "moveit_ros_planning_interface"
-  "rclcpp"
+  moveit_ros_planning_interface
+  rclcpp
+  tf2
+  tf2_geometry_msgs
+  moveit_visual_tools
 )
 
 install(TARGETS throw
