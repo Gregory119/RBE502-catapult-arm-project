@@ -75,7 +75,7 @@ USER root
 RUN apt install ros-humble-ur-robot-driver -y
 
 ######################################################################
-# Moveit related setup
+# Install Moveit
 ######################################################################
 # install mixin to complement colcon for building packages
 RUN apt install python3-colcon-mixin \
@@ -85,16 +85,32 @@ RUN apt install python3-colcon-mixin \
 # install vcstool
 RUN apt install python3-vcstool
 
+USER ros
+# RUN mkdir -p ${HOME}/tmp_ws/src \
+#     && cd ${HOME}/tmp_ws/src \
+#     && git clone -b humble https://github.com/moveit/moveit2_tutorials \
+#     && vcs import --recursive < moveit2_tutorials/moveit2_tutorials.repos
+# USER root
+# RUN apt remove ros-humble-moveit* \
+#     && apt update && rosdep install -r --from-paths ${HOME}/tmp_ws/src --ignore-src --rosdistro humble -y
+# RUN rm -r ${HOME}/tmp_ws/src
+
+RUN mkdir -p ${HOME}/tmp_ws/src
+WORKDIR ${HOME}/tmp_ws/src
+RUN git clone -b humble https://github.com/moveit/moveit2_tutorials \
+    && vcs import --recursive < moveit2_tutorials/moveit2_tutorials.repos
+RUN git clone https://github.com/Gregory119/RBE502-catapult-arm-project.git
+#    && vcs import --recursive < RBE502-catapult-arm-project/Universal_Robots_ROS2_Gazebo_Simulation.humble.repos
+USER root
+RUN apt remove ros-humble-moveit* \
+    && apt update && rosdep install -r --from-paths ${HOME}/tmp_ws/src --ignore-src --rosdistro humble -y
+WORKDIR ${HOME}
+RUN rm -r ${HOME}/tmp_ws/src
+
+
 ######################################################################
 # create directory to access host files
 ######################################################################
 USER ros
 RUN mkdir ${HOME}/local_dir
 WORKDIR ${HOME}/local_dir
-
-
-# might need this later
-# useradd ros \
-# && apt-get install -y sudo \
-# && echo "ros ALL=\(root\) NOPASSWD:ALL" > /etc/sudoers.d/ros \
-# && chmod 0440 /etc/sudoers.d/ros
