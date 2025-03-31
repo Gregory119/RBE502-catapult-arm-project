@@ -264,7 +264,6 @@ for i = 1:n
     
 end
 
-% tau = [t(1);t(2);t(3);t(4);t(5);t(6)]
 tau = t
 % M = t(1)/q1_dd
 % Joint Torque Vector (q_dd) : [tau1 ; tau2]
@@ -302,47 +301,22 @@ syms Lc1 Lc2 Lc3 Lc4 Lc5 Lc6
 syms L1 L2 L3 L4 L5 L6 real
 L_links = [L1; L2; L3; L4; L5; L6];
 
-% L1 = L_links(1,1);
-% L2 = L_links(1,2);
-% L3 = L(1,3);
-% L4 = L(1,4);
-% L5 = L(1,5);
-% L6 = L(1,6);
-
-% C12 = [0, -m(2)*L1*Lc2*s2*q2_d - m(3)*(L1*Lc3*s23 + L2*Lc3*s2)*q3_d, -m(3)*(L1*Lc3*s23 + L2*Lc3*s2)*q2_d];
-% C21 = -C12;  % Skew-symmetry
-% 
-% C23 = [m(2)*L1*Lc2*s2*q1_d,  0,  -m(3)*L2*Lc3*s23*q3_d];
-% C32 = -C23; % Skew-symmetry
-% 
-% C13 = [m(3)*(L1*Lc3*s23 + L2*Lc3*s2)*q1_d,  m(3)*L2*Lc3*s2*q2_d, 0];
-% C31 = -C13; % Skew-symmetry
-% 
-% C = [C12; C23; C13, C31, C32, C21]
 [M, rest] = equationsToMatrix(tau, q_dd);
-% G = subs(nonlinear_terms, q_d, zeros(6,1)); 
 % Extract Gravity Vector (G)
 G = simplify(subs(rest, q_d, zeros(6,1)));
 % C = simplify(nonlinear_terms - G);
 C = simplify(rest - G); 
 
-% Gravity Vector (G(q))
-
-%G = [(m1+m2)*L1*g*c1 + m2*g*L2*c123 ; m2*g*L2*c123]
-% G = tau - M - C
-
 
 % n_DOF Robot (Dynamic model) standard form
 % tau = Mq_dd + Cq_d + G
 
-% tau = M + C + G
 tau = M * q_dd + C + G
 
-%% Step 1e: 
 % τ=M(q)q¨​+C(q,q˙​)q˙​+g(q)
 % HW 3 RBE 501
 
-syms q1 q2 q3 q1_d q2_d q3_d q1_dd q2_dd q3_dd th1 th2 th3 th1_d th2_d th3_d
+% syms q1 q2 q3 q1_d q2_d q3_d q1_dd q2_dd q3_dd th1 th2 th3 th1_d th2_d th3_d
 
 % q = [q1;q2;q3];
 % q_d = [q1_d; q2_d; q3_d];
@@ -357,7 +331,7 @@ syms q1 q2 q3 q1_d q2_d q3_d q1_dd q2_dd q3_dd th1 th2 th3 th1_d th2_d th3_d
 %% Step 1d: Determine desired end effector position than use IK to find desired joint positions
 % Inverse Kinematics - Algebraic Method
 %
-disp("Algebraic Solution")
+% % disp("Algebraic Solution")
 % [th1_alg, th2_alg, th3_alg] = Alg_angle(x,y,L(1,1),L(2,1),L(3,1),phi)
 
 % compute Jacobian matrix
@@ -386,7 +360,36 @@ z = T.t(3)
 % ur5.plot(q5_des)
 % ur5.plot(q6_des)
 
-%% STEP 2: PD Controller
+%% STEP 2 - 4: Close the loop with PD Controller
+
+%{ 
+τ = M(q)q_dd​+C(q,q_d)q_d​ = (Kp * q_diff) - (Kv * q_d) <- closed loop eq.
+PD Gains: Kp and Kv
+q_diff = q_desired - q
+
+q_dd = M(q)−1[Kp​(qd​−q)+Kd​(q_d​desired​−q_d​)−C(q,q_d​)q_d​]
+
+(d/dt)[q; q_d] = [q_d; q_dd]
+
+State - Space Format: (Optimal Control)
+joint-space trajectory
+q_l = jtraj(q1_l, q2_l, t);
+q_r = jtraj(q1_r, q2_r, t);
+
+joint velocity and acceleration vectors, as a function of time
+[q_l, qd, qdd] = jtraj(q1_l, q2_l, t);
+[q_r, qd, qdd] = jtraj(q1_r, q2_r, t);
+
+jtraj method of the SerialLink class is more concise then the above step
+q_r = right.jtraj(T1, T2, t);
+q_l = left.jtraj(T1, T2, t);
+
+Show the trajectory as an animation
+
+WK 8 RBE 502
+%}
+
+
 % WK 13 RBE 500
 %(2*x_dd) + (8*x_d) + (16*x) = f
 % m = 2;
@@ -398,28 +401,16 @@ z = T.t(3)
 % 
 % pidTuner(sys,pd)
 
-% WK 8 RBE 502
-
-%% STEP 3: Closed loop control system equation
-
-%% STEP 4: State-space format
-
-% State Space (Optimal Control)
-% joint-space trajectory
-% q_l = jtraj(q1_l, q2_l, t);
-% q_r = jtraj(q1_r, q2_r, t);
-% 
-% % joint velocity and acceleration vectors, as a function of time
-% [q_l, qd, qdd] = jtraj(q1_l, q2_l, t);
-% [q_r, qd, qdd] = jtraj(q1_r, q2_r, t);
-% 
-% % jtraj method of the SerialLink class is more concise then the above step
-% q_r = right.jtraj(T1, T2, t);
-% q_l = left.jtraj(T1, T2, t);
-% 
-% % Show the trajectory as an animation
 
 %% STEP 5: Is the origin in equilibrium
+
+%{
+x1 = 0; x2 = 0; q_diff = 0; q_dot = 0
+%}
+
+if (x1 == 0) & if (x2 == 0) & if (q_diff == 0) & if (q_dot == 0):
+    disp('Origin is in Equilibrium')
+end
 
 %% STEP 6: Stability
 
@@ -467,7 +458,7 @@ q6 = 0;
 end
 
 %%
-function [th1, th2, th3] = Alg_angle(x, y, L1, L2, L3, phi)
+function [th1, th2, th3, th4, th5, th6] = Alg_angle(x, y, L1, L2, L3, L4, L5, L6, phi)
    if (phi >= 0)
         c2 = (x^2 + y^2 - L1^2 - L2^2)/(2*L1*L2);
         s2 = sqrt(1-c2^2);
@@ -479,6 +470,9 @@ function [th1, th2, th3] = Alg_angle(x, y, L1, L2, L3, phi)
         th2 = round(rad2deg(atan2(s2,c2)));
         %th2_neg = round(rad2deg(atan2(s2_neg,c2)));
         th3 = round(phi-th1-th2);
+        th4 = 0;
+        th5 = 0;
+        th6 = 0;
    else
         c2 = (x^2 + y^2 - L1^2 - L2^2)/(2*L1*L2);
         %s2 = sqrt(1-c2^2);
@@ -490,7 +484,21 @@ function [th1, th2, th3] = Alg_angle(x, y, L1, L2, L3, phi)
         %th2 = round(rad2deg(atan2(s2,c2)));
         th2 = round(rad2deg(atan2(s2_neg,c2))); %negative
         th3 = round(phi-th1-th2);
+        th4 = 0;
+        th5 = 0;
+        th6 = 0;
     end
+end
+
+function ee = forKin(q1, q2, q3, q4, q5, q6)
+a = 0.3;
+b = 0.3;
+c = 0.3;
+rho = b*cos(q2) + c*cos(q2+q3);
+x = rho*cos(q1);
+y = rho*sin(q1);
+z = a + b*sin(q2) + c*sin(q2+q3);
+ee = [x;y;z];
 end
 
 
