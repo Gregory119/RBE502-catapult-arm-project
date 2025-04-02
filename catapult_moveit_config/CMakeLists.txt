@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(ur_moveit_config)
+project(catapult_moveit_config)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
