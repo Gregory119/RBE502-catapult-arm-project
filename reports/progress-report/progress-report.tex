@@ -1,0 +1,221 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+%Template version as of 6/27/2024
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+
+\usepackage{subcaption}
+
+% algorithm psuedocode
+\usepackage{algorithm} 
+\usepackage{algpseudocode} 
+
+
+\begin{document}
+
+\title{RBE 550 Catapult Progress Report}
+
+\author{\IEEEauthorblockN{Gregory Kyle Jones}
+\IEEEauthorblockA{gkjones@wpi.edu}
+}
+
+\maketitle
+
+\section{Introduction}
+This report covers the progress of the simulated robot arm catapult
+project. There were some changes to the team in which Gregory Jones decided to
+continue with the project independently. The goal was to design multiple
+controllers for a robot arm to act like a catapult in order to evaluate which
+performs best. The robot was simulated to pick up an object and follow a target
+motion to throw the object into a target cup some particular distance away. This
+project was originally inspired by a separate team doing the same thing with
+hardware, however this work was done independently.
+
+\section{Methods}
+
+\subsection{Tools}
+Several tools were used to simulate the robot and its environment, plan the
+motion, and produce results. Gazebo was used for simulation, MoveIt was used for
+motion planning, ROS2 was used for robot communication and control, and Rviz was
+used for visual debugging. For simulation, a URDF model of a UR5 robot arm was
+used, however a gripper had to be attached and MoveIt configured
+accordingly. This simulation setup was used as part of the design process such
+that simulation in Matlab was not necessary.
+
+Docker was also used to containerize all of these tools, which helped track
+package dependencies. Docker proved to be particularly helpful for making quick
+changes to the version of the operating system and software tools. Finally, all
+code changes were tracked in a github repository.
+
+\subsection{Projectile Trajectory Planning}
+For simplicity the projectile trajectory calculation was represented as a two
+dimensional problem in which the motion occurs in an $x-y$ plane. The inputs to
+this problem include the release position $(x_0, y_0)$, the final position of
+the target cup $(x_f, y_f)$, the release angle $\theta$, and gravity $g$. Using
+standard projectile motion equations from~\cite{william25} and rearranging to solve
+for the release velocity $v$ gives the equation
+\begin{equation*}
+  v = \sqrt{ \left(\frac{g(x_f-x_0)^2}{2 cos^2\theta ((x_f-x_0) tan \theta - y_f + y_0)} \right ) }
+\end{equation*}
+
+\subsection{Motion Planning}
+Several trajectories were planned for the motion of the arm. First for the
+motion to pick up the projectile object, and then for the throwing motion. If
+the trajectory planning for the throwing motion was done in joint space, then
+the end effector would likely be rotating close to the point of releasing the
+projectile object. Any small error in the robot timing to release the object
+would cause a large error in reaching the target.
+
+To reduce this error amplification, the throwing motion instead used a straight
+line end effector path/trajectory in task space, as well as a constant task
+space target velocity for some duration leading up to the release point. The
+timestamps of each sample point in this linear trajectory were modified based on
+the linear segments with parabolic blends (LSPB) method
+\cite{mark2020control}. With the distance of the end effector along this linear
+path denoted as $s(t)$ where $t$ is time. There is a constant acceleration from
+$t_0$ to $t_b$, then a constant velocity from $t_b$ to $t_f-t_b$, and finally a
+constant decceleration from $t_f-t_b$ to $t_f$. The desired motion is described
+with the following equations.
+\begin{equation*}
+  s(t) =
+  \begin{cases}
+    s_0+\frac{\alpha}{2}t^2, & 0 \leq t < t_b \\
+    \frac{s_f+s_0-Vt_f}{2} + Vt & t_b \leq t < t_f-t_b \\
+    s_f-\alpha {t_f}^2+\alpha t_f t-\frac{\alpha}{2} t^2 & t_f-t_b \leq t_b \leq t_f
+  \end{cases}
+\end{equation*}
+
+\begin{equation*}
+  \dot{s}(t) =
+  \begin{cases}
+    \alpha t \\
+    V \\
+    \alpha t_f - \alpha t
+  \end{cases}
+\end{equation*}
+
+\begin{equation*}
+  \ddot{s}(t) =
+  \begin{cases}
+    \alpha \\
+    0 \\
+    -\alpha
+  \end{cases}
+\end{equation*}
+
+\begin{equation*}
+  \alpha = \frac{V}{t_b}
+\end{equation*}
+
+\subsection{Dynamic Model}
+The dynamic model of the selected 6 DoF robot arm (Universal Robots UR5) was
+derived analytically using Matlab and Lagrange's method. Although less accurate
+than Newton's equations of motion due to using only point masses, Lagrange's
+method is easier to derive. Lagrange's method applied to an $n$ DoF manipulator
+generates the equations of motion using
+\begin{equation*}
+  \frac{d}{dt} \left[ \frac{\partial \mathcal{L}(\boldsymbol{q}, \dot{\boldsymbol{q}})}{\partial \dot{\boldsymbol{q}}} \right] - \frac{\partial \mathcal{L}(\boldsymbol{q}, \dot{\boldsymbol{q}})}{\partial \dot{\boldsymbol{q}}} = \boldsymbol{\tau}
+\end{equation*}
+
+where $\boldsymbol{q}=[q_1, q_2, ..., q_n]^T$ is the generalized joint
+coordinate vector, $\boldsymbol{\tau}$ is the generalized joint force vector,
+and $\mathcal{L}(\boldsymbol{q}, \dot{\boldsymbol{q}})$ is the Lagrangian. The
+Lagrangian is given by
+\begin{equation*}
+  \mathcal{L}(\boldsymbol{q}, \dot{\boldsymbol{q}}) = \mathcal{K}(\boldsymbol{q}, \dot{\boldsymbol{q}}) - \mathcal{U}(\boldsymbol{q})
+\end{equation*}
+
+where $\mathcal{K}$ is the total kinetic energy, and $\mathcal{U}$ is the total
+potential energy due to conservative forces such as gravity and energy stored in
+compressed springs.
+
+The final equations of motion can then be represented in compact form as
+\begin{equation*}
+  M(\boldsymbol{q})\ddot{\boldsymbol{q}} + C(\boldsymbol{q}, \dot{\boldsymbol{q}})\dot{\boldsymbol{q}} + \boldsymbol{g}(\boldsymbol{q}) = \boldsymbol{\tau}
+\end{equation*}
+
+where $M(\boldsymbol{q})\ddot{\boldsymbol{q}}$ is the inertia matrix,
+$C(\boldsymbol{q}, \dot{\boldsymbol{q}})$ is the coriolis matrix, and
+$\boldsymbol{g}(\boldsymbol{q})$ is the gravity vector.
+
+\subsection{Controllers}
+Only controllers that satisfy the motion control objective were selected for
+implementation. That is they produce $\boldsymbol{\tau}$ such that the joint
+positions $\boldsymbol{q}$ follow the time changing desired joint positions
+$\boldsymbol{q_d}$ accurately. The selected controllers include computed torque
+and PD plus feedforward~\cite{kelly2007control}. Both of these controllers take into account the full
+dynamic model.
+
+\subsubsection{Computed Torque}
+The controller for computed torque uses the robot dynamics in the feedback loop
+and is given as
+\begin{equation*}
+  \boldsymbol{\tau} = M(\boldsymbol{q}) \left [ \ddot{\boldsymbol{q}}_d + K_v \dot{\tilde{\boldsymbol{q}}} + K_p \tilde{\boldsymbol{q}} \right ] + C(\boldsymbol{q}, \dot{\boldsymbol{q}})\dot{\boldsymbol{q}} + \boldsymbol{g}(\boldsymbol{q})
+\end{equation*}
+
+where $K_v$ and $K_p$ are symmetric positive definite design matrices and
+$\tilde{\boldsymbol{q}} = \boldsymbol{q}_d - \boldsymbol{q}$ is the position
+error. These design matrices can be selected to be diagonl, which cause the
+dynamics of errors of the closed loop system to become decoupled, such that the
+behavior of each joint position error is governed by a second order linear
+differential equation. These matrices can then be selected as
+\begin{align*}
+  K_p &= diag\{\omega_1^2, ... , \omega_n^2\} \\
+  K_v &= 2 K_p
+\end{align*}
+
+which causes each joint to respond as a critically damped linear system with
+bandwith $\omega_i$. Bandwidth $\omega_i$ defines the allowable range for joint
+velocity $i$ before more than a $90$ degree phase lag occurs, as well as the
+decay rate of the error for joint $i$.
+
+\subsubsection{PD Plus Feedforward}
+The controller for PD plus feedforward uses the dynamics in a feedforward manner
+by using the position and velocity of the desired trajectory. It also includes a
+PD feedback controller. The complete controller is given by
+\begin{equation*}
+  \boldsymbol{\tau} = K_p \tilde{\boldsymbol{q}} + K_v \dot{\tilde{\boldsymbol{q}}} + M(\boldsymbol{q}_d)\ddot{\boldsymbol{q}}_d +  C(\boldsymbol{q}_d, \dot{\boldsymbol{q}}_d)\dot{\boldsymbol{q}}_d + \boldsymbol{g}(\boldsymbol{q}_d)
+\end{equation*}
+
+The tuning procedure described in~\cite{kelly2007control} selects gain values for $K_p$
+and $K_v$ that guarantee global uniform asymptotic stability, ensuring that the
+motion control objective is reached.
+
+\section{Results}
+
+The following results will be produced for each controller with at least two
+different projectile target distances for performance evaluation:
+
+\begin{itemize}
+\item A demonstration video of the end-to-end sequence for each controller will
+  be captured. This will visually show whether the projectile reaches the target or not.
+\item A 2D plot of the desired, actual, and error joint trajectories over time.
+\item A 2D plot of the desired, actual, and error task space trajectories over time.
+\end{itemize}
+
+The last two items will show how well the controllers track the desired trajectories.
+
+\section{Conclusion}
+An evaluation of the results for each controller will be performed covering the
+performance of trajectory tracking as well as how close the projectile comes to
+reaching the projectile target (a cup) for various distance. These results will
+be compared to determine which controller is best.
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
