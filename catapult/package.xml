@@ -22,10 +22,11 @@
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>rviz2</exec_depend>
   <exec_depend>ur_controllers</exec_depend>
-  <exec_depend>ur_description</exec_depend>
-  <exec_depend>ur_moveit_config</exec_depend>
   <exec_depend>urdf</exec_depend>
   <exec_depend>xacro</exec_depend>
+  <exec_depend>robotiq_description</exec_depend>
+  <exec_depend>catapult_description</exec_depend>
+  <exec_depend>catapult_moveit_config</exec_depend>
 
   <depend>tf2</depend>
   <depend>moveit_ros_planning_interface</depend>
