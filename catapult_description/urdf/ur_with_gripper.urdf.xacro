@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<robot name="ur5" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find catapult_description)/urdf/ur.urdf.xacro" />
+  <xacro:include filename="$(find robotiq_description)/urdf/ur_to_robotiq_adapter.urdf.xacro" />
+  <xacro:include filename="$(find robotiq_description)/urdf/robotiq_2f_85_macro.urdf.xacro" />
+
+  <xacro:ur_to_robotiq prefix="" parent="flange" child="gripper_mount_link"/>
+  <!-- attache gripper -->
+  <xacro:robotiq_gripper name="gripper" prefix="" parent="gripper_mount_link">
+    <!-- <origin xyz="0 0 0.004" rpy="0 ${-pi/2} ${pi}"/> -->
+    <origin xyz="0 0 0.004" rpy="0 0 0"/>
+  </xacro:robotiq_gripper>
+    
+  <!-- Gazebo grasping plugin -->
+  <!-- <gazebo> -->
+  <!--   <gripper name="gazebo_gripper"> -->
+  <!--     <grasp_check> -->
+  <!--       <attach_steps>2</attach_steps>     -->
+  <!--       <detach_steps>2</detach_steps>     -->
+  <!--       <min_contact_count>3</min_contact_count> -->
+  <!--     </grasp_check> -->
+  <!--     <gripper_link>robotiq_85_left_finger_tip_link</gripper_link> -->
+  <!--     <gripper_link>robotiq_85_right_finger_tip_link</gripper_link> -->
+  <!--     <palm_link>robotiq_85_base_link</palm_link> -->
+  <!--   </gripper> -->
+  <!-- </gazebo> -->
+  
+</robot>
+

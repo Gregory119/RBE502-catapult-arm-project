@@ -42,6 +42,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "ur_type",
+            default_value="ur5e",
             description="Type/series of used UR robot.",
             choices=[
                 "ur3",
