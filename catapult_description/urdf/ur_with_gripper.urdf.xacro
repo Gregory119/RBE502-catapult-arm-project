@@ -5,9 +5,8 @@
   <xacro:include filename="$(find robotiq_description)/urdf/ur_to_robotiq_adapter.urdf.xacro" />
   <xacro:include filename="$(find robotiq_description)/urdf/robotiq_2f_85_macro.urdf.xacro" />
 
-  <!-- <xacro:ur_to_robotiq prefix="" parent="flange" child="gripper_mount_link"/> -->
-
-  coupling joint (modified from robotiq_description/ur_to_robotiq_adapter.urdf.xacro)
+  <!-- <xacro:ur_to_robotiq prefix="" parent="flange" child="gripper_mount_link"/>
+       coupling joint (modified from robotiq_description/ur_to_robotiq_adapter.urdf.xacro) -->
   <joint name="ur_to_robotiq_joint" type="fixed">
     <parent link="flange"/>
     <child link="ur_to_robotiq_link"/>
@@ -18,6 +17,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
+        <!-- <mesh filename="file://$(find robotiq_description)/meshes/visual/2f_85/ur_to_robotiq_adapter.dae"/> -->
         <mesh filename="package://robotiq_description/meshes/visual/2f_85/ur_to_robotiq_adapter.dae"/>
       </geometry>
     </visual>
@@ -42,11 +42,27 @@
   <link name="gripper_mount_link"/>
 
   <!-- attache gripper -->
-  <xacro:robotiq_gripper name="gripper" prefix="" parent="gripper_mount_link" use_fake_hardware="true">
+  <xacro:robotiq_gripper name="gripper" prefix="" parent="gripper_mount_link">
     <!-- <origin xyz="0 0 0.004" rpy="0 ${-pi/2} ${pi}"/> -->
     <origin xyz="0 0 0.004" rpy="0 0 0"/>
   </xacro:robotiq_gripper>
-    
+  
+  <!-- <joint name="robotiq_85_right_knuckle_joint_mimic" type="continuous"> -->
+  <!--   <parent link="robotiq_85_base_link" /> -->
+  <!-- </joint> -->
+  <!-- <joint name="robotiq_85_left_inner_knuckle_joint_mimic" type="continuous"> -->
+  <!--   <parent link="robotiq_85_base_link" /> -->
+  <!-- </joint> -->
+  <!-- <joint name="robotiq_85_right_inner_knuckle_joint_mimic" type="continuous"> -->
+  <!--   <parent link="robotiq_85_base_link" /> -->
+  <!-- </joint> -->
+  <!-- <joint name="robotiq_85_left_finger_tip_joint_mimic" type="continuous"> -->
+  <!--   <parent link="robotiq_85_left_finger_link" /> -->
+  <!-- </joint> -->
+  <!-- <joint name="robotiq_85_right_finger_tip_joint_mimic" type="continuous"> -->
+  <!--   <parent link="robotiq_85_right_finger_link" /> -->
+  <!-- </joint> -->
+
   <!-- Gazebo grasping plugin -->
   <!-- <gazebo> -->
   <!--   <gripper name="gazebo_gripper"> -->

@@ -34,6 +34,9 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.substitutions import FindPackageShare
 
+import os
+from ament_index_python import get_package_prefix
+
 
 def launch_setup(context, *args, **kwargs):
 
@@ -92,6 +95,14 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
+    # set gazebo path to load additional mesh files
+
+    pkg_share_path = os.pathsep + os.path.join(get_package_prefix('robotiq_description'), 'share')
+    if 'GAZEBO_MODEL_PATH' in os.environ:
+        os.environ['GAZEBO_MODEL_PATH'] += pkg_share_path
+    else:
+        os.environ['GAZEBO_MODEL_PATH'] =  pkg_share_path
+    
     declared_arguments = []
     # UR specific arguments
     declared_arguments.append(

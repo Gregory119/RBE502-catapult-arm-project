@@ -90,3 +90,25 @@ Example using MoveIt with simulated robot:
 ros2 launch catapult ur_sim_moveit.launch.py
 
 ```
+
+## Creating the URDF File for Moveit Assistant
+- Use source code package of `robotiq_description` with `humble` branch. This is
+  used by the `catapult_description` package.
+- Build `catapult_description` and its dependencies with (this will build `robotiq_description`)
+
+``` shell
+colcon build --packages-up-to catapult_description
+```
+- Go to `catapult_description/urdf/` and generate the urdf file by running 
+
+``` shell
+xacro ur_with_gripper.urdf.xacro name:=ur_manipulator > ur_with_gripper.urdf
+```
+- Visualize the urdf file by first building the `catapult_description` package and then running:
+
+``` shell
+ros2 launch catapult_description view_ur.launch.py
+```
+
+- Open this file with the moveit assistant
+

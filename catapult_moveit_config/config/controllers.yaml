@@ -1,6 +1,8 @@
+# this config file is used with MoveItSimpleControllerManager in ur_moveit.launch.py
 controller_names:
   - scaled_joint_trajectory_controller
   - joint_trajectory_controller
+  - gripper_controller
 
 
 scaled_joint_trajectory_controller:
@@ -27,3 +29,11 @@ joint_trajectory_controller:
     - wrist_1_joint
     - wrist_2_joint
     - wrist_3_joint
+    - robotiq_85_left_knuckle_joint
+
+gripper_controller:
+  type: GripperCommand
+  joints:
+    - robotiq_85_left_knuckle_joint
+  action_ns: gripper_cmd
+  default: true
