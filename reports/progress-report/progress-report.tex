@@ -31,14 +31,22 @@
 \maketitle
 
 \section{Introduction}
-This report covers the progress of the simulated robot arm catapult
-project. There were some changes to the team in which Gregory Jones decided to
-continue with the project independently. The goal was to design multiple
-controllers for a robot arm to act like a catapult in order to evaluate which
-performs best. The robot was simulated to pick up an object and follow a target
-motion to throw the object into a target cup some particular distance away. This
-project was originally inspired by a separate team doing the same thing with
-hardware, however this work was done independently.
+This report covers the progress of the simulated robot arm catapult project. The
+main goals include the design of multiple controllers for a robot arm to act
+like a catapult in order to evaluate which controller performs best. Ideally the
+robot will be simulated to pick up an object and follow a target motion to throw
+the object into a target cup some particular distance away.
+
+Although there was a recent change to the team, in which Gregory Jones decided
+to continue with the project independently, content for the original project
+goals are included. However, its likely one person won't be able to finish it
+all so there is a minimum goal. This minimum goal is to design at least one
+controller and evaluate it in simulation with the robot arm following the throw
+trajectory without any gripper, ball, or target cup. So far the simulation
+environment has been set up, and a straight line cartesian path for the end
+effector has been planned using Moveit. A lot of time was spent trying to attach
+a gripper and connect it to the motion planning software without much progress,
+which is another reason for the scope change.
 
 \section{Methods}
 
