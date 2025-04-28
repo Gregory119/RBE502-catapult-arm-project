@@ -157,19 +157,18 @@ def launch_setup(context, *args, **kwargs):
         condition=UnlessCondition(start_joint_controller),
     )
 
-    # gripper_controller_spawner_started = Node(
-    #     package="controller_manager",
-    #     executable="spawner",
-    #     arguments=["gripper_controller", "-c", "/controller_manager"],
-    #     condition=IfCondition(start_joint_controller),
-    # )
-
-    # gripper_controller_spawner_stopped = Node(
-    #     package="controller_manager",
-    #     executable="spawner",
-    #     arguments=["gripper_controller", "-c", "/controller_manager", "--stopped"],
-    #     condition=IfCondition(start_joint_controller),
-    # )
+    gripper_controller_spawner_started = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["gripper_controller", "-c", "/controller_manager"],
+        condition=IfCondition(start_joint_controller),
+    )
+    gripper_controller_spawner_stopped = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["gripper_controller", "-c", "/controller_manager", "--stopped"],
+        condition=UnlessCondition(start_joint_controller),
+    )
 
 
     # Gazebo nodes
@@ -195,8 +194,8 @@ def launch_setup(context, *args, **kwargs):
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
-        # gripper_controller_spawner_started,
-        # gripper_controller_spawner_stopped,
+        gripper_controller_spawner_started,
+        gripper_controller_spawner_stopped,
         initial_joint_controller_spawner_stopped,
         initial_joint_controller_spawner_started,
         gazebo,

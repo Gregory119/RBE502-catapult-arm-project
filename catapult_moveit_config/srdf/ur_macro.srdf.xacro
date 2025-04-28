@@ -11,8 +11,8 @@
     <!--CHAINS - When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
     <!--SUBGROUPS - Groups can also be formed by referencing to already defined group names-->
     <group name="${prefix}${name}_manipulator">
-      <!-- <chain base_link="${prefix}base_link" tip_link="${prefix}tool0" /> -->
-      <chain base_link="${prefix}base_link" tip_link="robotiq_85_left_knuckle_link" />
+      <chain base_link="${prefix}base_link" tip_link="${prefix}tool0" />
+      <!-- <chain base_link="${prefix}base_link" tip_link="robotiq_85_left_knuckle_link" /> -->
     </group>
     <group name="gripper">
         <link name="robotiq_85_base_link"/>
@@ -33,6 +33,7 @@
       <joint name="${prefix}wrist_1_joint" value="0" />
       <joint name="${prefix}wrist_2_joint" value="0" />
       <joint name="${prefix}wrist_3_joint" value="0" />
+      <!-- <joint name="robotiq_85_left_knuckle_joint" value="0.8"/> -->
     </group_state>
     <group_state name="${prefix}up" group="${prefix}${name}_manipulator">
       <joint name="${prefix}elbow_joint" value="0" />
@@ -41,6 +42,7 @@
       <joint name="${prefix}wrist_1_joint" value="-1.5707" />
       <joint name="${prefix}wrist_2_joint" value="0" />
       <joint name="${prefix}wrist_3_joint" value="0" />
+      <!-- <joint name="robotiq_85_left_knuckle_joint" value="0.8"/> -->
     </group_state>
     <group_state name="${prefix}test_configuration" group="${prefix}${name}_manipulator">
       <joint name="${prefix}elbow_joint" value="1.4" />
@@ -49,12 +51,13 @@
       <joint name="${prefix}wrist_1_joint" value="-1.2" />
       <joint name="${prefix}wrist_2_joint" value="-1.6" />
       <joint name="${prefix}wrist_3_joint" value="-0.11" />
+      <!-- <joint name="robotiq_85_left_knuckle_joint" value="0.8"/> -->
     </group_state>
     <group_state name="open" group="gripper">
         <joint name="robotiq_85_left_knuckle_joint" value="0"/>
     </group_state>
     <group_state name="close" group="gripper">
-        <joint name="robotiq_85_left_knuckle_joint" value="0.8"/>
+        <joint name="robotiq_85_left_knuckle_joint" value="0.7929"/>
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="gripper" parent_link="flange" group="gripper" parent_group="ur_manipulator"/>
