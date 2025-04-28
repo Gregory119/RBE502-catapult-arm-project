@@ -157,6 +157,20 @@ def launch_setup(context, *args, **kwargs):
         condition=UnlessCondition(start_joint_controller),
     )
 
+    gripper_controller_spawner_started = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["gripper_controller", "-c", "/controller_manager"],
+        condition=IfCondition(start_joint_controller),
+    )
+    gripper_controller_spawner_stopped = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["gripper_controller", "-c", "/controller_manager", "--stopped"],
+        condition=UnlessCondition(start_joint_controller),
+    )
+
+
     # Gazebo nodes
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -180,6 +194,8 @@ def launch_setup(context, *args, **kwargs):
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
+        gripper_controller_spawner_started,
+        gripper_controller_spawner_stopped,
         initial_joint_controller_spawner_stopped,
         initial_joint_controller_spawner_started,
         gazebo,
@@ -242,7 +258,7 @@ def generate_launch_description():
             "initial_positions_file",
             default_value=PathJoinSubstitution(
                 [
-                    FindPackageShare("ur_description"),
+                    FindPackageShare("catapult_description"),
                     "config",
                     "initial_positions.yaml",
                 ]
@@ -253,7 +269,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_package",
-            default_value="ur_description",
+            default_value="catapult_description",
             description="Description package with robot URDF/XACRO files. Usually the argument \
         is not set, it enables use of a custom description.",
         )
@@ -261,7 +277,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_file",
-            default_value="ur.urdf.xacro",
+            default_value="ur_with_gripper.urdf.xacro",
             description="URDF/XACRO description file with the robot.",
         )
     )

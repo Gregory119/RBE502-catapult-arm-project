@@ -30,7 +30,7 @@ ament_target_dependencies(
 install(TARGETS throw
   DESTINATION lib/${PROJECT_NAME})
 
-install(DIRECTORY config launch
+install(DIRECTORY config launch urdf
   DESTINATION share/${PROJECT_NAME}
 )
 

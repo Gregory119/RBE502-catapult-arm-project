@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<robot name="ur5" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find catapult_description)/urdf/ur.urdf.xacro" />
+  <xacro:include filename="$(find robotiq_description)/urdf/ur_to_robotiq_adapter.urdf.xacro" />
+  <xacro:include filename="$(find robotiq_description)/urdf/robotiq_2f_85_macro.urdf.xacro" />
+  <xacro:include filename="$(find catapult_description)/urdf/2f_85.ros2_control.xacro" />
+
+  <!-- <xacro:ur_to_robotiq prefix="" parent="flange" child="gripper_mount_link"/>
+       coupling joint (modified from robotiq_description/ur_to_robotiq_adapter.urdf.xacro) -->
+  <joint name="ur_to_robotiq_joint" type="fixed">
+    <parent link="flange"/>
+    <child link="ur_to_robotiq_link"/>
+    <origin xyz="0.004 0 0" rpy="0 ${pi/2} 0"/>
+  </joint>
+  
+  <link name="ur_to_robotiq_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <!-- <mesh filename="file://$(find robotiq_description)/meshes/visual/2f_85/ur_to_robotiq_adapter.dae"/> -->
+        <mesh filename="package://robotiq_description/meshes/visual/2f_85/ur_to_robotiq_adapter.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robotiq_description/meshes/collision/2f_85/ur_to_robotiq_adapter.stl"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.01" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.000044" ixy="0.0" ixz="0.0" iyy="0.000027" iyz="0.0" izz="0.000027" />
+    </inertial>
+  </link>
+
+  <joint name="gripper_side_joint" type="fixed">
+    <parent link="ur_to_robotiq_link"/>
+    <child link="gripper_mount_link"/>
+    <origin xyz="0 0 0.011" rpy="0 0 0"/>
+  </joint>
+  <link name="gripper_mount_link"/>
+
+  <!-- attache gripper -->
+  <xacro:robotiq_gripper name="gripper" prefix="" parent="gripper_mount_link">
+    <!-- <origin xyz="0 0 0.004" rpy="0 ${-pi/2} ${pi}"/> -->
+    <origin xyz="0 0 0.004" rpy="0 0 0"/>
+  </xacro:robotiq_gripper>
+
+  <!-- ros2 control for gripper -->
+  <xacro:robotiq_gripper_ros2_control name="robotiq_gripper_ros2_control" prefix=""/>
+
+  
+  <!-- <joint name="robotiq_85_right_knuckle_joint_mimic" type="continuous"> -->
+  <!--   <parent link="robotiq_85_base_link" /> -->
+  <!-- </joint> -->
+  <!-- <joint name="robotiq_85_left_inner_knuckle_joint_mimic" type="continuous"> -->
+  <!--   <parent link="robotiq_85_base_link" /> -->
+  <!-- </joint> -->
+  <!-- <joint name="robotiq_85_right_inner_knuckle_joint_mimic" type="continuous"> -->
+  <!--   <parent link="robotiq_85_base_link" /> -->
+  <!-- </joint> -->
+  <!-- <joint name="robotiq_85_left_finger_tip_joint_mimic" type="continuous"> -->
+  <!--   <parent link="robotiq_85_left_finger_link" /> -->
+  <!-- </joint> -->
+  <!-- <joint name="robotiq_85_right_finger_tip_joint_mimic" type="continuous"> -->
+  <!--   <parent link="robotiq_85_right_finger_link" /> -->
+  <!-- </joint> -->
+
+  <!-- Gazebo grasping plugin -->
+  <!-- <gazebo> -->
+  <!--   <gripper name="gazebo_gripper"> -->
+  <!--     <grasp_check> -->
+  <!--       <attach_steps>2</attach_steps>     -->
+  <!--       <detach_steps>2</detach_steps>     -->
+  <!--       <min_contact_count>3</min_contact_count> -->
+  <!--     </grasp_check> -->
+  <!--     <gripper_link>robotiq_85_left_finger_tip_link</gripper_link> -->
+  <!--     <gripper_link>robotiq_85_right_finger_tip_link</gripper_link> -->
+  <!--     <palm_link>robotiq_85_base_link</palm_link> -->
+  <!--   </gripper> -->
+  <!-- </gazebo> -->
+  
+</robot>
+
