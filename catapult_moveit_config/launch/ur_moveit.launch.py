@@ -181,7 +181,8 @@ def launch_setup(context, *args, **kwargs):
     change_controllers = context.perform_substitution(use_sim_time)
     if change_controllers == "true":
         controllers_yaml["scaled_joint_trajectory_controller"]["default"] = False
-        controllers_yaml["joint_trajectory_controller"]["default"] = True
+        controllers_yaml["joint_trajectory_controller"]["default"] = False
+        controllers_yaml["custom_trajectory_controller"]["default"] = True
 
     moveit_controllers = {
         "moveit_simple_controller_manager": controllers_yaml,
