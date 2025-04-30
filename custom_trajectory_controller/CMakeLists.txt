@@ -21,6 +21,9 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     trajectory_msgs
 )
 
+find_package(eigen3_cmake_module REQUIRED)
+find_package(Eigen3)
+
 find_package(ament_cmake REQUIRED)
 find_package(backward_ros REQUIRED)
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
@@ -44,7 +47,7 @@ target_include_directories(custom_trajectory_controller PUBLIC
 target_link_libraries(custom_trajectory_controller PUBLIC
   custom_trajectory_controller_parameters
 )
-ament_target_dependencies(custom_trajectory_controller PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_target_dependencies(custom_trajectory_controller PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS} Eigen3)
 
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.

@@ -325,7 +325,19 @@ controller_interface::return_type JointTrajectoryController::update(
         }
         if (has_effort_command_interface_)
         {
-          assign_interface_from_point(joint_command_interface_[3], tmp_command_);
+            // transform position and velocity errors into vectors
+            const Eigen::Map<Eigen::Matrix<double, 6, 1>> ep (state_error_.positions.data());
+            const Eigen::Map<Eigen::Matrix<double, 6, 1>> ev (state_error_.velocities.data());
+
+            const auto Kp = 150*Eigen::Matrix<double, 6, 6>::Identity();
+            const auto Kv = Eigen::Matrix<double, 6, 6>::Identity();
+            
+            // calculate command torque vector
+            const Eigen::Matrix<double, 6, 1> tau = Kp*ep + Kv*ev;
+            // convert torques to std::vector
+            std::vector<double> tau_cmds(tau.data(), tau.data() + tau.size());
+
+            assign_interface_from_point(joint_command_interface_[3], tau_cmds);
         }
 
         // store the previous command. Used in open-loop control mode
