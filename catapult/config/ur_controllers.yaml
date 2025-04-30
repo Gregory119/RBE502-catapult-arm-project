@@ -63,10 +63,60 @@ custom_trajectory_controller:
       - wrist_2_joint
       - wrist_3_joint
     command_interfaces:
-      - position
+      # - position
+      - effort
     state_interfaces:
       - position
       - velocity
+    gains:
+      shoulder_pan_joint:
+        angle_wraparound: false
+        d: 0.0
+        ff_velocity_scale: 1.0
+        i: 0.0
+        i_clamp: 0.0
+        normalize_error: false
+        p: 500.0      
+      shoulder_lift_joint:
+        angle_wraparound: false
+        d: 0.0
+        ff_velocity_scale: 1.0
+        i: 0.0
+        i_clamp: 0.0
+        normalize_error: false
+        p: 500.0      
+      elbow_joint:
+        angle_wraparound: false
+        d: 0.0
+        ff_velocity_scale: 1.0
+        i: 0.0
+        i_clamp: 0.0
+        normalize_error: false
+        p: 500.0      
+      wrist_1_joint:
+        angle_wraparound: false
+        d: 0.0
+        ff_velocity_scale: 1.0
+        i: 0.0
+        i_clamp: 0.0
+        normalize_error: false
+        p: 500.0      
+      wrist_2_joint:
+        angle_wraparound: false
+        d: 0.0
+        ff_velocity_scale: 1.0
+        i: 0.0
+        i_clamp: 0.0
+        normalize_error: false
+        p: 500.0      
+      wrist_3_joint:
+        angle_wraparound: false
+        d: 0.0
+        ff_velocity_scale: 1.0
+        i: 0.0
+        i_clamp: 0.0
+        normalize_error: false
+        p: 500.0      
     state_publish_rate: 100.0
     action_monitor_rate: 20.0
     allow_partial_joints_goal: false
