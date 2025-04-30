@@ -27,8 +27,8 @@
 
 /// \author Adolfo Rodriguez Tsouroukdissian
 
-#ifndef JOINT_TRAJECTORY_CONTROLLER__TOLERANCES_HPP_
-#define JOINT_TRAJECTORY_CONTROLLER__TOLERANCES_HPP_
+#ifndef CUSTOM_TRAJECTORY_CONTROLLER__TOLERANCES_HPP_
+#define CUSTOM_TRAJECTORY_CONTROLLER__TOLERANCES_HPP_
 
 #include <limits>
 #include <stdexcept>
@@ -36,12 +36,12 @@
 #include <vector>
 
 #include "control_msgs/action/follow_joint_trajectory.hpp"
-#include "joint_trajectory_controller/joint_trajectory_controller_parameters.hpp"
+#include "custom_trajectory_controller/custom_trajectory_controller_parameters.hpp"
 
 #include "rclcpp/node.hpp"
 #include "rclcpp/time.hpp"
 
-namespace joint_trajectory_controller
+namespace custom_trajectory_controller
 {
 /**
  * \brief Trajectory state tolerances for position, velocity and acceleration variables.
@@ -344,6 +344,6 @@ inline bool check_state_tolerance_per_joint(
   return false;
 }
 
-}  // namespace joint_trajectory_controller
+}  // namespace custom_trajectory_controller
 
-#endif  // JOINT_TRAJECTORY_CONTROLLER__TOLERANCES_HPP_
+#endif  // CUSTOM_TRAJECTORY_CONTROLLER__TOLERANCES_HPP_

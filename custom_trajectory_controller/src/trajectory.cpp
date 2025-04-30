@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "joint_trajectory_controller/trajectory.hpp"
+#include "custom_trajectory_controller/trajectory.hpp"
 
 #include <memory>
 
@@ -22,7 +22,7 @@
 #include "rclcpp/time.hpp"
 #include "std_msgs/msg/header.hpp"
 
-namespace joint_trajectory_controller
+namespace custom_trajectory_controller
 {
 Trajectory::Trajectory() : trajectory_start_time_(0), time_before_traj_msg_(0) {}
 
@@ -389,4 +389,4 @@ bool Trajectory::has_nontrivial_msg() const
   return has_trajectory_msg() && trajectory_msg_->points.size() > 1;
 }
 
-}  // namespace joint_trajectory_controller
+}  // namespace custom_trajectory_controller

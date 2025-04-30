@@ -1,4 +1,4 @@
-# joint_trajectory_controllers package
+# custom_trajectory_controllers package
 
 The package implements controllers to interpolate joint's trajectory.
 

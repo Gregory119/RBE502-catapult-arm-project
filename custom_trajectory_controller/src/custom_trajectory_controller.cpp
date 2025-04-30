@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "joint_trajectory_controller/joint_trajectory_controller.hpp"
+#include "custom_trajectory_controller/custom_trajectory_controller.hpp"
 
 #include <chrono>
 #include <functional>
@@ -27,7 +27,7 @@
 #include "controller_interface/helpers.hpp"
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
-#include "joint_trajectory_controller/trajectory.hpp"
+#include "custom_trajectory_controller/trajectory.hpp"
 #include "lifecycle_msgs/msg/state.hpp"
 #include "rclcpp/logging.hpp"
 #include "rclcpp/qos.hpp"
@@ -37,7 +37,7 @@
 #include "rclcpp_action/server_goal_handle.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 
-namespace joint_trajectory_controller
+namespace custom_trajectory_controller
 {
 JointTrajectoryController::JointTrajectoryController()
 : controller_interface::ControllerInterface(), dof_(0)
@@ -1713,9 +1713,9 @@ void JointTrajectoryController::init_hold_position_msg()
   }
 }
 
-}  // namespace joint_trajectory_controller
+}  // namespace custom_trajectory_controller
 
 #include "pluginlib/class_list_macros.hpp"
 
 PLUGINLIB_EXPORT_CLASS(
-  joint_trajectory_controller::JointTrajectoryController, controller_interface::ControllerInterface)
+  custom_trajectory_controller::JointTrajectoryController, controller_interface::ControllerInterface)
