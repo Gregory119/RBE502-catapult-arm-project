@@ -33,13 +33,13 @@ int main(int argc, char * argv[])
   auto move_group = MoveGroupInterface(node, "ur_manipulator");
 
   // Construct and initialize MoveItVisualTools
-  namespace rvt = rviz_visual_tools;
-  auto visual_tools = moveit_visual_tools::MoveItVisualTools{
-      node, "base_link", rvt::RVIZ_MARKER_TOPIC,
-      move_group.getRobotModel()};
-  visual_tools.deleteAllMarkers();
-  visual_tools.loadRemoteControl();
-  visual_tools.trigger();
+  // namespace rvt = rviz_visual_tools;
+  // auto visual_tools = moveit_visual_tools::MoveItVisualTools{
+  //     node, "base_link", rvt::RVIZ_MARKER_TOPIC,
+  //     move_group.getRobotModel()};
+  // visual_tools.deleteAllMarkers();
+  // visual_tools.loadRemoteControl();
+  // visual_tools.trigger();
   
   // Set a start pose
   using namespace std::numbers;
@@ -52,9 +52,9 @@ int main(int argc, char * argv[])
     
   move_group.setPoseTarget(start_pose);
 
-  visual_tools.publishAxisLabeled(start_pose, "start_pose");
-  visual_tools.publishAxisLabeled(end_pose, "end_pose");
-  visual_tools.trigger();
+  // visual_tools.publishAxisLabeled(start_pose, "start_pose");
+  // visual_tools.publishAxisLabeled(end_pose, "end_pose");
+  // visual_tools.trigger();
   
   // move to start pose
 
@@ -85,8 +85,8 @@ int main(int argc, char * argv[])
   RCLCPP_INFO(logger, "Visualizing cartesion path (%.2f%% achieved)", fraction * 100.0);
 
   //visual_tools.deleteAllMarkers();
-  visual_tools.publishPath(waypoints, rvt::LIME_GREEN, rvt::SMALL);
-  visual_tools.trigger();
+  // visual_tools.publishPath(waypoints, rvt::LIME_GREEN, rvt::SMALL);
+  // visual_tools.trigger();
 
   // execute trajectory
   move_group.execute(trajectory);
