@@ -329,8 +329,10 @@ controller_interface::return_type JointTrajectoryController::update(
             const Eigen::Map<Eigen::Matrix<double, 6, 1>> ep (state_error_.positions.data());
             const Eigen::Map<Eigen::Matrix<double, 6, 1>> ev (state_error_.velocities.data());
 
-            const auto Kp = 150*Eigen::Matrix<double, 6, 6>::Identity();
-            const auto Kv = Eigen::Matrix<double, 6, 6>::Identity();
+            Eigen::Matrix<double, 6, 6> Kp = 200*Eigen::Matrix<double, 6, 6>::Identity();
+            Kp(5,5) = 20;
+            Eigen::Matrix<double, 6, 6> Kv = Eigen::Matrix<double, 6, 6>::Identity();
+            Kv(5,5) = 0.1;
             
             // calculate command torque vector
             const Eigen::Matrix<double, 6, 1> tau = Kp*ep + Kv*ev;
