@@ -49,13 +49,14 @@ com_l5 = [0;16.34e-3;-1.8e-3];
 com_l6 = [0;0;-1.159e-3];
 
 % approximate COMS for simplification
-syms l1 l2 l3
+syms l1 l2 l3 l4
 com_l1 = [0;0;0];
 com_l2 = [l1;0;l2];
 com_l3 = [l3;0;0];
-com_l4 = [0;0;0];
-com_l5 = [0;0;0];
+com_l4 = [0;-l4;0];
+com_l5 = [0;l4;0];
 com_l6 = [0;0;0];
+
 
 In_1 = [0.014972358333333331,0,0;
         0,0.014972358333333331,0;
