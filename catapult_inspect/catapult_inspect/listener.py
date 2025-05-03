@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.duration import Duration, Infinite
+from rclpy.time import Time
 import rclpy.qos as qos
 from rclpy.qos_event import SubscriptionEventCallbacks
 
@@ -22,24 +23,11 @@ class MinimalSubscriber(Node):
             '/custom_trajectory_controller/follow_joint_trajectory/_action/feedback',
             self.listener_callback,
             10)
-            # qos.QoSProfile(history=qos.HistoryPolicy.KEEP_LAST,
-            #                depth=100,
-            #                reliability=qos.ReliabilityPolicy.RELIABLE,
-            #                durability=qos.DurabilityPolicy.VOLATILE,
-            #                lifespan=Infinite,
-            #                deadline=Infinite,
-            #                liveliness=qos.LivelinessPolicy.AUTOMATIC,
-            #                liveliness_lease_duration=Infinite),
-            # event_callbacks = SubscriptionEventCallbacks(deadline=self.deadline,
-            #                                              incompatible_qos=self.incompatible_qos,
-            #                                              liveliness=self.liveliness,
-            #                                              message_lost=self.msg_lost,
-            #                                              use_default_callbacks=False))
         
         self.subscription  # prevent unused variable warning
         print("contructed")
 
-        self.fig, (self.ax_pos, self.ax_vel) = plt.subplots(2,1)
+        self.fig, ((self.ax_pos, self.ax_vel), (self.ax_pos_err, self.ax_vel_err)) = plt.subplots(2,2)
         self.pos_desired_plotter = DataPlotter(self.ax_pos, 'qd', fmt='--', lw=3)
         self.pos_actual_plotter = DataPlotter(self.ax_pos, 'q', fmt='-', lw=1.5)
         self.vel_desired_plotter = DataPlotter(self.ax_vel, 'dqd', fmt='--', lw=3)
@@ -51,8 +39,8 @@ class MinimalSubscriber(Node):
         if self.ax_pos.get_legend() is not None:
             self.ax_pos.get_legend().remove()
 
-        self.pos_desired_plotter.update(msg.feedback.desired.positions)
-        self.pos_actual_plotter.update(msg.feedback.actual.positions)
+        self.pos_desired_plotter.update(msg.feedback.desired.positions, msg.feedback.header.stamp)
+        self.pos_actual_plotter.update(msg.feedback.actual.positions, msg.feedback.header.stamp)
         self.ax_pos.set_title('Joint Positions vs Time')
         self.ax_pos.set_xlabel('time [s]')
         self.ax_pos.set_ylabel('position [rad]')
@@ -61,8 +49,8 @@ class MinimalSubscriber(Node):
         # update velocity subplot
         if self.ax_vel.get_legend() is not None:
             self.ax_vel.get_legend().remove()
-        self.vel_desired_plotter.update(msg.feedback.desired.velocities)
-        self.vel_actual_plotter.update(msg.feedback.actual.velocities)
+        self.vel_desired_plotter.update(msg.feedback.desired.velocities, msg.feedback.header.stamp)
+        self.vel_actual_plotter.update(msg.feedback.actual.velocities, msg.feedback.header.stamp)
         self.ax_vel.set_title('Joint Velocities vs Time')
         self.ax_vel.set_xlabel('time [s]')
         self.ax_vel.set_ylabel('velocity [rad/s]')
@@ -86,8 +74,11 @@ class DataPlotter:
         # self.labels = []
         self.num_joints = 6
         self.joint_data = [[] for _ in range(self.num_joints)]
+        self.time_data = [] # seconds since start
 
-    def update(self, new_joint_data):
+    def update(self, new_joint_data, time_from_start):
+        time = Time.from_msg(time_from_start)
+        self.time_data.append(float(time.nanoseconds)*1e-6)
         for i in range(self.num_joints):
             self.joint_data[i].append(new_joint_data[i])
 
@@ -98,15 +89,10 @@ class DataPlotter:
 
         # create new lines for plot
         for i in range(self.num_joints):
-            x = range(len(self.joint_data[i]))
+            x = self.time_data
             y = self.joint_data[i]
             line = self.ax.plot(x, y, self.fmt, linewidth=self.lw, label='{}[{}]'.format(self.desc, i))[0]
             self.lines.append(line)
-            # if len(self.labels) < self.num_joints:
-            #     self.labels.append('{}[{}]'.format(self.desc, i))
-
-        # reset legend
-        # self.ax.legend(self.lines, self.labels)
         
 
 minimal_subscriber = None
