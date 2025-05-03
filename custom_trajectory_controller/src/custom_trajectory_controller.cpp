@@ -39,6 +39,74 @@
 
 namespace custom_trajectory_controller
 {
+
+    struct Dynamics
+    {
+        Eigen::Matrix<double, 6, 6> M = Eigen::Matrix<double, 6, 6>::Zero();
+        Eigen::Matrix<double, 6, 1> G = Eigen::Matrix<double, 6, 1>::Zero();
+    };
+
+    Dynamics getDynamics(const Eigen::Matrix<double, 6, 1>& q)
+    {
+        static const double g = 9.81;
+
+        // link parameters
+        static const double lz1 = 0.089159;
+        static const double lx3 = -0.425;
+        static const double lx4 = -0.39225;
+        static const double lz4 = 0.10915;
+        static const double ly5 = -0.09465;
+        static const double ly6 = 0.0823;
+
+        // coms parameters
+        static const double l1 = -212.5e-3;
+        static const double l2 = 113.36e-3;
+        static const double l3 = -242.25e-3;
+
+        const double q_1 = q(0);
+        const double q_2 = q(1);
+        const double q_3 = q(2);
+        const double q_4 = q(3);
+        const double q_5 = q(4);
+        const double q_6 = q(5);
+
+        const double m7 = 6.6320197e-01 + 8*0.03 + 0.01; // gripper mass
+        const double m1 = 3.7;
+        const double m2 = 8.393;
+        const double m3 = 2.33;
+        const double m4 = 1.219;
+        const double m5 = 1.219;
+        const double m6 = 0.1879 + m7;
+
+        //const double m7 = 0; // gripper mass
+        //const double m1 = 0;
+        //const double m2 = 0;
+        //const double m3 = 0;
+        // const double m4 = 0;
+        // const double m5 = 0;
+        // const double m6 = 0;
+
+        // gravity
+        Dynamics dyn;
+        dyn.G << 0,
+            g*m6*(lx4*cos(q_2 + q_3) + lx3*cos(q_2) - 1.0*ly5*(cos(q_2 + q_3)*sin(q_4) + sin(q_2 + q_3)*cos(q_4)) - 1.0*ly6*sin(q_5)*(cos(q_2 + q_3)*cos(q_4) - 1.0*sin(q_2 + q_3)*sin(q_4))) + g*m3*(l3*cos(q_2 + q_3) + lx3*cos(q_2)) + g*m4*(lx4*cos(q_2 + q_3) + lx3*cos(q_2)) + g*m5*(lx4*cos(q_2 + q_3) + lx3*cos(q_2) - 1.0*ly5*(cos(q_2 + q_3)*sin(q_4) + sin(q_2 + q_3)*cos(q_4))) + g*l1*m2*cos(q_2),
+            g*m5*(lx4*cos(q_2 + q_3) - 1.0*ly5*sin(q_2 + q_3 + q_4)) - 1.0*g*m6*(ly5*sin(q_2 + q_3 + q_4) - 1.0*lx4*cos(q_2 + q_3) + ly6*cos(q_2 + q_3 + q_4)*sin(q_5)) + g*l3*m3*cos(q_2 + q_3) + g*lx4*m4*cos(q_2 + q_3),
+            - 1.0*g*m6*(ly5*sin(q_2 + q_3 + q_4) + ly6*cos(q_2 + q_3 + q_4)*sin(q_5)) - 1.0*g*ly5*m5*sin(q_2 + q_3 + q_4),
+            -1.0*g*ly6*m6*sin(q_2 + q_3 + q_4)*cos(q_5),
+            0;
+
+        // mass matrix
+        dyn.M << m6*pow((lz4*sin(q_1) + lx4*cos(q_2 + q_3)*cos(q_1) + lx3*cos(q_1)*cos(q_2) + ly6*cos(q_5)*sin(q_1) - 1.0*ly5*sin(q_2 + q_3 + q_4)*cos(q_1) - 1.0*ly6*cos(q_2 + q_3 + q_4)*cos(q_1)*sin(q_5)),2) + m2*(pow(l1,2) - 1.0*pow(l1,2)*pow(sin(q_2),2) + pow(l2,2)) + m6*pow((lz4*cos(q_1) - 1.0*lx4*cos(q_2 + q_3)*sin(q_1) + ly6*cos(q_1)*cos(q_5) - 1.0*lx3*cos(q_2)*sin(q_1) + ly5*sin(q_2 + q_3 + q_4)*sin(q_1) + ly6*cos(q_2 + q_3 + q_4)*sin(q_1)*sin(q_5)),2) + m4*(0.5*pow(lx4,2)*cos(2.0*q_2 + 2.0*q_3) + 0.5*pow(lx3,2)*cos(2.0*q_2) + 0.5*pow(lx3,2) + 0.5*pow(lx4,2) + pow(lz4,2) + lx3*lx4*cos(q_3) + lx3*lx4*cos(2.0*q_2 + q_3)) + m3*pow((l3*cos(q_2 + q_3) + lx3*cos(q_2)),2) + 0.5*m5*(pow(lx4,2)*cos(2.0*q_2 + 2.0*q_3) - 1.0*pow(ly5,2)*cos(2.0*q_2 + 2.0*q_3 + 2.0*q_4) + pow(lx3,2)*cos(2.0*q_2) + pow(lx3,2) + pow(lx4,2) + pow(ly5,2) + 2.0*pow(lz4,2) + 2.0*lx3*lx4*cos(q_3) - 2.0*lx4*ly5*sin(q_4) + 2.0*lx3*lx4*cos(2.0*q_2 + q_3) - 2.0*lx4*ly5*sin(2.0*q_2 + 2.0*q_3 + q_4) - 2.0*lx3*ly5*sin(q_3 + q_4) - 2.0*lx3*ly5*sin(2.0*q_2 + q_3 + q_4)),                                                                                                                                                                                                                                                             - 1.0*m6*(lz4 + ly6*cos(q_5))*(0.5*ly6*cos(q_2 + q_3 + q_4 + q_5) + lx4*sin(q_2 + q_3) + lx3*sin(q_2) + ly5*cos(q_2 + q_3 + q_4) - 0.5*ly6*cos(q_2 + q_3 + q_4 - 1.0*q_5)) - 1.0*lz4*m5*(lx4*sin(q_2 + q_3) + lx3*sin(q_2) + ly5*cos(q_2 + q_3 + q_4)) - 1.0*lz4*m4*(lx4*sin(q_2 + q_3) + lx3*sin(q_2)) - 1.0*l1*l2*m2*sin(q_2),                                                                                                                                                                                                                    - 1.0*m6*(lz4 + ly6*cos(q_5))*(0.5*ly6*cos(q_2 + q_3 + q_4 + q_5) + lx4*sin(q_2 + q_3) + ly5*cos(q_2 + q_3 + q_4) - 0.5*ly6*cos(q_2 + q_3 + q_4 - 1.0*q_5)) - 1.0*lz4*m5*(lx4*sin(q_2 + q_3) + ly5*cos(q_2 + q_3 + q_4)) - 1.0*lx4*lz4*m4*sin(q_2 + q_3),                                                                                                                                                                                                                                    - 1.0*m6*(lz4 + ly6*cos(q_5))*(0.5*ly6*cos(q_2 + q_3 + q_4 + q_5) + ly5*cos(q_2 + q_3 + q_4) - 0.5*ly6*cos(q_2 + q_3 + q_4 - 1.0*q_5)) - 1.0*ly5*lz4*m5*cos(q_2 + q_3 + q_4),                                                                                      -1.0*ly6*m6*(0.5*lx3*sin(q_2 - 1.0*q_5) - 0.5*ly5*cos(q_2 + q_3 + q_4 + q_5) + 0.5*lz4*cos(q_2 + q_3 + q_4 + q_5) - 0.5*lx3*sin(q_2 + q_5) + 0.5*lx4*sin(q_2 + q_3 - 1.0*q_5) + ly6*cos(q_2 + q_3 + q_4) - 0.5*lx4*sin(q_2 + q_3 + q_5) + 0.5*ly5*cos(q_2 + q_3 + q_4 - 1.0*q_5) + 0.5*lz4*cos(q_2 + q_3 + q_4 - 1.0*q_5)), 0,
+            - 1.0*m6*(lz4 + ly6*cos(q_5))*(0.5*ly6*cos(q_2 + q_3 + q_4 + q_5) + lx4*sin(q_2 + q_3) + lx3*sin(q_2) + ly5*cos(q_2 + q_3 + q_4) - 0.5*ly6*cos(q_2 + q_3 + q_4 - 1.0*q_5)) - 1.0*lz4*m5*(lx4*sin(q_2 + q_3) + lx3*sin(q_2) + ly5*cos(q_2 + q_3 + q_4)) - 1.0*lz4*m4*(lx4*sin(q_2 + q_3) + lx3*sin(q_2)) - 1.0*l1*l2*m2*sin(q_2), pow(l1,2)*m2 + pow(l3,2)*m3 + pow(lx3,2)*m3 + pow(lx3,2)*m4 + pow(lx3,2)*m5 + pow(lx4,2)*m4 + pow(lx3,2)*m6 + pow(lx4,2)*m5 + pow(lx4,2)*m6 + pow(ly5,2)*m5 + pow(ly5,2)*m6 + pow(ly6,2)*m6 - 1.0*pow(ly6,2)*m6*pow(cos(q_5),2) + 2.0*l3*lx3*m3*cos(q_3) + 2.0*lx3*lx4*m4*cos(q_3) + 2.0*lx3*lx4*m5*cos(q_3) + 2.0*lx3*lx4*m6*cos(q_3) - 2.0*lx4*ly5*m5*sin(q_4) - 2.0*lx4*ly5*m6*sin(q_4) - 2.0*lx3*ly5*m5*cos(q_3)*sin(q_4) - 2.0*lx3*ly5*m5*cos(q_4)*sin(q_3) - 2.0*lx3*ly5*m6*cos(q_3)*sin(q_4) - 2.0*lx3*ly5*m6*cos(q_4)*sin(q_3) - 2.0*lx4*ly6*m6*cos(q_4)*sin(q_5) - 2.0*lx3*ly6*m6*cos(q_3)*cos(q_4)*sin(q_5) + 2.0*lx3*ly6*m6*sin(q_3)*sin(q_4)*sin(q_5), pow(l3,2)*m3 + pow(lx4,2)*m4 + pow(lx4,2)*m5 + pow(lx4,2)*m6 + pow(ly5,2)*m5 + pow(ly5,2)*m6 + pow(ly6,2)*m6 - 1.0*pow(ly6,2)*m6*pow(cos(q_5),2) - 1.0*lx3*ly5*m5*sin(q_3 + q_4) + l3*lx3*m3*cos(q_3) + lx3*lx4*m4*cos(q_3) + lx3*lx4*m5*cos(q_3) + lx3*lx4*m6*cos(q_3) - 2.0*lx4*ly5*m5*sin(q_4) - 2.0*lx4*ly5*m6*sin(q_4) - 1.0*lx3*ly5*m6*cos(q_3)*sin(q_4) - 1.0*lx3*ly5*m6*cos(q_4)*sin(q_3) - 2.0*lx4*ly6*m6*cos(q_4)*sin(q_5) - 1.0*lx3*ly6*m6*cos(q_3)*cos(q_4)*sin(q_5) + lx3*ly6*m6*sin(q_3)*sin(q_4)*sin(q_5),                                                                                                             - 1.0*m6*(pow(ly6,2)*pow(cos(q_5),2) - 1.0*pow(ly5,2) - 1.0*pow(ly6,2) + lx4*ly5*sin(q_4) + lx3*ly5*cos(q_3)*sin(q_4) + lx3*ly5*cos(q_4)*sin(q_3) + lx4*ly6*cos(q_4)*sin(q_5) + lx3*ly6*cos(q_3)*cos(q_4)*sin(q_5) - 1.0*lx3*ly6*sin(q_3)*sin(q_4)*sin(q_5)) - 1.0*ly5*m5*(lx3*sin(q_3 + q_4) - 1.0*ly5 + lx4*sin(q_4)),                                                                                                                                                                                                                                                                                                                                              -1.0*ly6*m6*cos(q_5)*(lx3*sin(q_3 + q_4) - 1.0*ly5 + lx4*sin(q_4)), 0,
+            - 1.0*m6*(lz4 + ly6*cos(q_5))*(0.5*ly6*cos(q_2 + q_3 + q_4 + q_5) + lx4*sin(q_2 + q_3) + ly5*cos(q_2 + q_3 + q_4) - 0.5*ly6*cos(q_2 + q_3 + q_4 - 1.0*q_5)) - 1.0*lz4*m5*(lx4*sin(q_2 + q_3) + ly5*cos(q_2 + q_3 + q_4)) - 1.0*lx4*lz4*m4*sin(q_2 + q_3),                                                                                                                 pow(l3,2)*m3 + pow(lx4,2)*m4 + pow(lx4,2)*m5 + pow(lx4,2)*m6 + pow(ly5,2)*m5 + pow(ly5,2)*m6 + pow(ly6,2)*m6 - 1.0*pow(ly6,2)*m6*pow(cos(q_5),2) - 1.0*lx3*ly5*m5*sin(q_3 + q_4) + l3*lx3*m3*cos(q_3) + lx3*lx4*m4*cos(q_3) + lx3*lx4*m5*cos(q_3) + lx3*lx4*m6*cos(q_3) - 2.0*lx4*ly5*m5*sin(q_4) - 2.0*lx4*ly5*m6*sin(q_4) - 1.0*lx3*ly5*m6*cos(q_3)*sin(q_4) - 1.0*lx3*ly5*m6*cos(q_4)*sin(q_3) - 2.0*lx4*ly6*m6*cos(q_4)*sin(q_5) - 1.0*lx3*ly6*m6*cos(q_3)*cos(q_4)*sin(q_5) + lx3*ly6*m6*sin(q_3)*sin(q_4)*sin(q_5),                                                                                                                                                                                                                                                                                       m5*(pow(lx4,2) - 2.0*sin(q_4)*lx4*ly5 + pow(ly5,2)) - 1.0*m6*(pow(ly6,2)*pow(cos(q_5),2) - 1.0*pow(lx4,2) - 1.0*pow(ly5,2) - 1.0*pow(ly6,2) + 2.0*lx4*ly5*sin(q_4) + 2.0*lx4*ly6*cos(q_4)*sin(q_5)) + pow(l3,2)*m3 + pow(lx4,2)*m4,                                                                                                                                                                                                                                                                              ly5*m5*(ly5 - 1.0*lx4*sin(q_4)) - 1.0*m6*(pow(ly6,2)*pow(cos(q_5),2) - 1.0*pow(ly5,2) - 1.0*pow(ly6,2) + lx4*ly5*sin(q_4) + lx4*ly6*cos(q_4)*sin(q_5)),                                                                                                                                                                                                                                                                                                                                                                        ly6*m6*cos(q_5)*(ly5 - 1.0*lx4*sin(q_4)), 0,
+            - 1.0*m6*(lz4 + ly6*cos(q_5))*(0.5*ly6*cos(q_2 + q_3 + q_4 + q_5) + ly5*cos(q_2 + q_3 + q_4) - 0.5*ly6*cos(q_2 + q_3 + q_4 - 1.0*q_5)) - 1.0*ly5*lz4*m5*cos(q_2 + q_3 + q_4),                                                                                                                                                                                                                                                                                         - 1.0*m6*(pow(ly6,2)*pow(cos(q_5),2) - 1.0*pow(ly5,2) - 1.0*pow(ly6,2) + lx4*ly5*sin(q_4) + lx3*ly5*cos(q_3)*sin(q_4) + lx3*ly5*cos(q_4)*sin(q_3) + lx4*ly6*cos(q_4)*sin(q_5) + lx3*ly6*cos(q_3)*cos(q_4)*sin(q_5) - 1.0*lx3*ly6*sin(q_3)*sin(q_4)*sin(q_5)) - 1.0*ly5*m5*(lx3*sin(q_3 + q_4) - 1.0*ly5 + lx4*sin(q_4)),                                                                                                                                                                                                                                                                                                                                          ly5*m5*(ly5 - 1.0*lx4*sin(q_4)) - 1.0*m6*(pow(ly6,2)*pow(cos(q_5),2) - 1.0*pow(ly5,2) - 1.0*pow(ly6,2) + lx4*ly5*sin(q_4) + lx4*ly6*cos(q_4)*sin(q_5)),                                                                                                                                                                                                                                                                                                                                                                        m6*(pow(ly5,2) + pow(ly6,2)*pow(sin(q_5),2)) + pow(ly5,2)*m5, ly6*m6*cos(q_1)*(ly5*cos(q_2 + q_3 + q_4) - 1.0*ly6*sin(q_2 + q_3 + q_4)*sin(q_5))*(sin(q_1)*sin(q_5) + cos(q_2 + q_3 + q_4)*cos(q_1)*cos(q_5)) + ly6*m6*sin(q_2 + q_3 + q_4)*cos(q_5)*(ly5*sin(q_2 + q_3 + q_4) + ly6*cos(q_2 + q_3 + q_4)*sin(q_5)) - 1.0*ly6*m6*sin(q_1)*(ly5*cos(q_2 + q_3 + q_4) - 1.0*ly6*sin(q_2 + q_3 + q_4)*sin(q_5))*(cos(q_1)*sin(q_5) - 1.0*cos(q_2 + q_3 + q_4)*cos(q_5)*sin(q_1)), 0,
+            -1.0*ly6*m6*(0.5*lx3*sin(q_2 - 1.0*q_5) - 0.5*ly5*cos(q_2 + q_3 + q_4 + q_5) + 0.5*lz4*cos(q_2 + q_3 + q_4 + q_5) - 0.5*lx3*sin(q_2 + q_5) + 0.5*lx4*sin(q_2 + q_3 - 1.0*q_5) + ly6*cos(q_2 + q_3 + q_4) - 0.5*lx4*sin(q_2 + q_3 + q_5) + 0.5*ly5*cos(q_2 + q_3 + q_4 - 1.0*q_5) + 0.5*lz4*cos(q_2 + q_3 + q_4 - 1.0*q_5)),                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          -1.0*ly6*m6*cos(q_5)*(lx3*sin(q_3 + q_4) - 1.0*ly5 + lx4*sin(q_4)),                                                                                                                                                                                                                                                                                                                                                                                                                                    ly6*m6*cos(q_5)*(ly5 - 1.0*lx4*sin(q_4)), ly6*m6*cos(q_1)*(ly5*cos(q_2 + q_3 + q_4) - 1.0*ly6*sin(q_2 + q_3 + q_4)*sin(q_5))*(sin(q_1)*sin(q_5) + cos(q_2 + q_3 + q_4)*cos(q_1)*cos(q_5)) + ly6*m6*sin(q_2 + q_3 + q_4)*cos(q_5)*(ly5*sin(q_2 + q_3 + q_4) + ly6*cos(q_2 + q_3 + q_4)*sin(q_5)) - 1.0*ly6*m6*sin(q_1)*(ly5*cos(q_2 + q_3 + q_4) - 1.0*ly6*sin(q_2 + q_3 + q_4)*sin(q_5))*(cos(q_1)*sin(q_5) - 1.0*cos(q_2 + q_3 + q_4)*cos(q_5)*sin(q_1)),                                                                                                                                                                                                                                                                                                                                                                                                        pow(ly6,2)*m6, 0,
+            0,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           0,                                                                                                                                                                                                                                                                                                                                                                                                                                                                           0,                                                                                                                                                                                                                                                                                                                                                                                                               0,                                                                                                                                                                                                                                                                                                                                                                                                               0, 0;
+        
+        return dyn;
+    }
+
+    
 JointTrajectoryController::JointTrajectoryController()
 : controller_interface::ControllerInterface(), dof_(0)
 {
@@ -328,18 +396,58 @@ controller_interface::return_type JointTrajectoryController::update(
             // transform position and velocity errors into vectors
             const Eigen::Map<Eigen::Matrix<double, 6, 1>> ep (state_error_.positions.data());
             const Eigen::Map<Eigen::Matrix<double, 6, 1>> ev (state_error_.velocities.data());
+            const Eigen::Map<Eigen::Matrix<double, 6, 1>> q (state_current_.positions.data());
+            const Eigen::Map<Eigen::Matrix<double, 6, 1>> ddqd (state_desired_.accelerations.data());
 
-            Eigen::Matrix<double, 6, 6> Kp = 200*Eigen::Matrix<double, 6, 6>::Identity();
-            Kp(5,5) = 20;
-            Eigen::Matrix<double, 6, 6> Kv = Eigen::Matrix<double, 6, 6>::Identity();
-            Kv(5,5) = 0.1;
+            // std::ostringstream os;
+            // os << "ddqd = \n" << ddqd;
+            // RCLCPP_WARN(logger, "%s", os.str().c_str());
             
-            // calculate command torque vector
-            const Eigen::Matrix<double, 6, 1> tau = Kp*ep + Kv*ev;
-            // convert torques to std::vector
-            std::vector<double> tau_cmds(tau.data(), tau.data() + tau.size());
+            const Dynamics dyn = getDynamics(q);
 
-            assign_interface_from_point(joint_command_interface_[3], tau_cmds);
+            const bool use_comp_torque = true;
+            
+            if (use_comp_torque){
+                // Eigen::Matrix<double, 6, 6> Kp = 200*Eigen::Matrix<double, 6, 6>::Identity();
+                // Kp(5,5) = 20;
+                // Eigen::Matrix<double, 6, 6> Kv = Eigen::Matrix<double, 6, 6>::Identity();
+                // Kv(5,5) = 0.1;
+                // //Kv = 0.0*Kv;
+                // // calculate command torque vector
+                // const Eigen::Matrix<double, 6, 1> tau = dyn.M*(ddqd) + Kp*ep + Kv*ev + dyn.G;
+
+                const double bandwidth = 20;
+                Eigen::Matrix<double, 6, 6> Kp = pow(bandwidth,2)*Eigen::Matrix<double, 6, 6>::Identity();
+                Eigen::Matrix<double, 6, 6> Kv = 2*bandwidth*Eigen::Matrix<double, 6, 6>::Identity();
+                // calculate command torque vector
+                Eigen::Matrix<double, 6, 1> tau = dyn.M*(ddqd + Kp*ep + Kv*ev) + dyn.G;
+
+                // Due to simplifying the location of the COM of link6/gripper,
+                // the associated row in the mass matrix is zero, resulting in
+                // the torque of joint 6 only having gravity compensation and no
+                // error compensation terms. So use PID control for this joint
+                // instead.
+                const double kp = 20;
+                const double kv = 0.1;
+                tau(5) += kp*ep(5) + kv*ev(5);
+                
+                // convert torques to std::vector
+                std::vector<double> tau_cmds(tau.data(), tau.data() + tau.size());
+
+                assign_interface_from_point(joint_command_interface_[3], tau_cmds);
+            } else {
+                Eigen::Matrix<double, 6, 6> Kp = 200*Eigen::Matrix<double, 6, 6>::Identity();
+                Kp(5,5) = 20;
+                Eigen::Matrix<double, 6, 6> Kv = Eigen::Matrix<double, 6, 6>::Identity();
+                Kv(5,5) = 0.1;
+            
+                // calculate command torque vector
+                const Eigen::Matrix<double, 6, 1> tau = Kp*ep + Kv*ev + dyn.G;
+                // convert torques to std::vector
+                std::vector<double> tau_cmds(tau.data(), tau.data() + tau.size());
+
+                assign_interface_from_point(joint_command_interface_[3], tau_cmds);
+            }
         }
 
         // store the previous command. Used in open-loop control mode
