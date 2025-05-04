@@ -27,6 +27,7 @@
   <exec_depend>robotiq_description</exec_depend>
   <exec_depend>catapult_description</exec_depend>
   <exec_depend>catapult_moveit_config</exec_depend>
+  <exec_depend>custom_trajectory_controller</exec_depend>
 
   <depend>tf2</depend>
   <depend>moveit_ros_planning_interface</depend>
