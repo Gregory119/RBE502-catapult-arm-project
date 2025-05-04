@@ -54,8 +54,15 @@ int main(int argc, char * argv[])
 
   // visual_tools.publishAxisLabeled(start_pose, "start_pose");
   // visual_tools.publishAxisLabeled(end_pose, "end_pose");
+
+  // draw line between start and end pose
+  std::vector<geometry_msgs::msg::Pose> waypoints;
+  waypoints.push_back(start_pose);
+  waypoints.push_back(end_pose);
+
+  // visual_tools.publishPath(waypoints, rvt::LIME_GREEN, rvt::SMALL);
   // visual_tools.trigger();
-  
+    
   // move to start pose
 
   // Create a plan
@@ -73,20 +80,14 @@ int main(int argc, char * argv[])
       RCLCPP_ERROR(logger, "Planning failed!");
   }
 
-  // cartesian plan between start and end pose
-  std::vector<geometry_msgs::msg::Pose> waypoints;
-  waypoints.push_back(start_pose);
-  waypoints.push_back(end_pose);
-
+  // plan and execute cartesian path
   const double eef_step = 0.01;
   const double jump_threshold = 5.0;
   moveit_msgs::msg::RobotTrajectory trajectory;
   double fraction = move_group.computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory);
   RCLCPP_INFO(logger, "Visualizing cartesion path (%.2f%% achieved)", fraction * 100.0);
 
-  //visual_tools.deleteAllMarkers();
-  // visual_tools.publishPath(waypoints, rvt::LIME_GREEN, rvt::SMALL);
-  // visual_tools.trigger();
+  // visual_tools.deleteAllMarkers();
 
   // execute trajectory
   move_group.execute(trajectory);
