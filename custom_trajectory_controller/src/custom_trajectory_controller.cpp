@@ -406,18 +406,11 @@ controller_interface::return_type JointTrajectoryController::update(
             // os << "ddqd = \n" << ddqd;
             // RCLCPP_WARN(logger, "%s", os.str().c_str());
             
-            const Dynamics dyn = getDynamics(q);
-
-            const bool use_comp_torque = true;
+            const bool use_comp_torque = false;
             
             if (use_comp_torque){
-                // Eigen::Matrix<double, 6, 6> Kp = 200*Eigen::Matrix<double, 6, 6>::Identity();
-                // Kp(5,5) = 20;
-                // Eigen::Matrix<double, 6, 6> Kv = Eigen::Matrix<double, 6, 6>::Identity();
-                // Kv(5,5) = 0.1;
-                // //Kv = 0.0*Kv;
-                // // calculate command torque vector
-                // const Eigen::Matrix<double, 6, 1> tau = dyn.M*(ddqd) + Kp*ep + Kv*ev + dyn.G;
+                // use actual joint configuration
+                const Dynamics dyn = getDynamics(q);
 
                 const double bandwidth = 100;
                 Eigen::Matrix<double, 6, 6> Kp = pow(bandwidth,2)*Eigen::Matrix<double, 6, 6>::Identity();
@@ -438,14 +431,19 @@ controller_interface::return_type JointTrajectoryController::update(
                 std::vector<double> tau_cmds(tau.data(), tau.data() + tau.size());
 
                 assign_interface_from_point(joint_command_interface_[3], tau_cmds);
-            } else {
+            } else { // use PD+FF
+                // use desired joint configuration
+                const Eigen::Map<Eigen::Matrix<double, 6, 1>> qd (state_desired_.positions.data());
+                const Dynamics dyn = getDynamics(qd);
+
                 Eigen::Matrix<double, 6, 6> Kp = 200*Eigen::Matrix<double, 6, 6>::Identity();
                 Kp(5,5) = 20;
                 Eigen::Matrix<double, 6, 6> Kv = Eigen::Matrix<double, 6, 6>::Identity();
                 Kv(5,5) = 0.1;
-            
+
                 // calculate command torque vector
-                const Eigen::Matrix<double, 6, 1> tau = Kp*ep + Kv*ev + dyn.G;
+                Eigen::Matrix<double, 6, 1> tau = Kp*ep + Kv*ev + dyn.M*(ddqd) + dyn.G;
+            
                 // convert torques to std::vector
                 std::vector<double> tau_cmds(tau.data(), tau.data() + tau.size());
 
