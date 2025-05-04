@@ -159,7 +159,7 @@ $\boldsymbol{g}(\boldsymbol{q})$ is the gravity vector.
 During implementation is was found that the matrices $M$ and $C$ were large and
 complex terms. Some approximations were made to reduce the complexity of these
 terms. These included setting several center of mass dimensions to zero, as well
-as using point masses only for ineria terms (no rotational inertia). The
+as using point masses only for ineria terms (no inertia tensor). The
 coriolis term still remained the most complex so it was neglected, assuming the
 inertia matrix would contribute more to the torques.
 
@@ -206,8 +206,8 @@ decay rate of the error for joint $i$.
 During implementation it was found that the approximations made to the dynamics
 resulted in no torque generated for the final joint. More specifically, the
 center of mass was assumed to be located at the center of the joint, and there
-was no rotational inertia. Due to errors in these assumptions, the joint would
-have a large swaying motion instead of remaining fixed based on a fixed desired
+was no inertia tensor. Due to errors in these assumptions, the joint would have
+a large swaying motion instead of remaining fixed based on a fixed desired
 position. To address this, a separate PD controller was designed for the sixth
 joint only.
 
@@ -322,7 +322,7 @@ some of relative center of mass dimensions to zero helped, as well as neglecting
 the coriolis term. The mass matrix was still complex but with some careful find
 and replace operations it didn't take too long to put inside the
 code. Additionally, it was unexpected that the assumption of only point masses
-without rotational inertia would cause the computed torque controller to not
+(no inertia tensor) would cause the computed torque controller to not
 generate torque for joint 6. Using a separate PD controller for this joint
 addressed the issue, but it did add some complexity.
 
