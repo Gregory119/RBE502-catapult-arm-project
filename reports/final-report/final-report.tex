@@ -34,16 +34,11 @@
 
 
 \section{Introduction}
-This report covers the progress of the simulated robot arm catapult project. The
-main goals include the design of multiple controllers for a robot arm to act
-like a catapult in order to evaluate which controller performs best. To perform
-this task the robot should pick up an object and follow a target motion to throw
-the object into a target cup some particular distance away.
-
-Most of the work was completed to the point where the robot with an attached
-gripper would follow a planned throwing motion using one of two designed
-controllers. However, gripping and releasing an object is considered future
-work. All of the code for the project can be found on Github at
+Controlling a robot arm to throw an object is a challenging task. The goal of
+this work is to design at least one controller to follow trajectories that could
+be used to throw an object with a UR5 robot arm. The task of picking up an
+object was excluded in order to focus more on the controller design. All of the
+code for the project can be found on Github at
 \url{https://github.com/Gregory119/RBE502-catapult-arm-project} which mainly
 consists of C++, but also includes Python and Matlab scripts.
 
@@ -58,18 +53,18 @@ used, however a gripper had to be attached and MoveIt configured
 accordingly. This simulation setup was used as part of the design process such
 that simulation in Matlab was not necessary.
 
-Docker was also used to containerize all of these tools, which helped track
+Docker was used to containerize all of these tools, which helped track
 package dependencies. Docker proved to be particularly helpful for making quick
 changes to the version of the operating system and software tools. Finally, all
 code changes were tracked in a github repository.
 
 \subsection{Projectile Trajectory Planning}
-Before the throwing motion could be determined, the trajectory of the thrown
-object through the air without robot contact had to be planned first. For
-simplicity the projectile trajectory calculation was represented as a two
-dimensional problem in which the motion occurs in an $x-y$ plane. The inputs to
-this problem include the release position $(x_0, y_0)$, the final position of
-the target cup $(x_f, y_f)$, the release angle $\theta$, and gravity $g$. Using
+Planning of the projectile trajectory was done theoretically, and is included
+here for completeness, but did not end up in the final implementation for
+simplicity. The projectile trajectory calculation was represented as a
+two dimensional problem in which the motion occurs in an $x-y$ plane. The inputs
+to this problem include the release position $(x_0, y_0)$, the final position of
+the target $(x_f, y_f)$, the release angle $\theta$, and gravity $g$. Using
 standard projectile motion equations from~\cite{william25} and rearranging to
 solve for the release velocity $v$ gives the equation
 \begin{equation*}
@@ -77,12 +72,12 @@ solve for the release velocity $v$ gives the equation
 \end{equation*}
 
 \subsection{Motion Planning}
-Several trajectories needed to be planned for the motion of the arm. This
-included picking up the object and then throwing it. If the trajectory planning
-for the throwing motion was done in joint space, then the end effector would
-likely be rotating close to the point of releasing the projectile object. Any
-small error in the robot timing to release the object would cause a large error
-in reaching the target.
+With the object assumed to already be grasped, the first trajectory move the
+robot to a start configuration for the throw motion, and the second trajectory
+performed the throw motion. If the trajectory planning for the throwing motion
+was done in joint space, then the end effector would likely be rotating close to
+the point of releasing the projectile object. Any small error in the robot
+timing to release the object would cause a large error in reaching the target.
 
 To reduce this error amplification, the throwing motion instead used a straight
 line end effector path/trajectory in task space, as well as a constant task
@@ -205,11 +200,11 @@ decay rate of the error for joint $i$.
 
 During implementation it was found that the approximations made to the dynamics
 resulted in no torque generated for the final joint. More specifically, the
-center of mass was assumed to be located at the center of the joint, and there
-was no inertia tensor. Due to errors in these assumptions, the joint would have
-a large swaying motion instead of remaining fixed based on a fixed desired
-position. To address this, a separate PD controller was designed for the sixth
-joint only.
+center of mass of the final link was assumed to be located at the center of the
+final joint, and the rotational inertia was assumed to be zero. Due to errors in
+these assumptions, the joint would have a large swaying motion instead of
+remaining fixed, based on a fixed desired position. To address this, a separate
+PD controller was designed for the sixth joint only.
 
 \subsubsection{PD Plus Feedforward}
 The controller for PD plus feedforward uses the dynamics in a feedforward manner
@@ -237,7 +232,7 @@ motion control objective is reached.
 Visualizations of the simulated experiment and main robot configurations are
 shown in Figure \ref{fig:configs}. These also include the start and end poses of
 the straight line throwing path in task space. The robot begins at the home
-configuration before following a joint space planned motion to start
+configuration before following a joint space planned motion to the start
 configuration of the throwing motion.
 
 \begin{figure}[!t]
@@ -271,13 +266,13 @@ were tuned manually for simplicity.
 
 \begin{figure}[!t]
   \includegraphics[width=0.5\textwidth]{comp-torque-results.png}
-  \caption{Results using a computed torque controller.}
+  \caption{Desired and actual joint trajectories for throwing motion using a computed torque controller.}
   \label{fig:comp-torque-results}
 \end{figure}
 
 \begin{figure}[!t]
   \includegraphics[width=0.5\textwidth]{pd-plus-ff-results.png}
-  \caption{Results using a PD plus feedforward controller.}
+  \caption{Desired and actual joint trajectories for throwing motion using a PD plus feedforward controller.}
   \label{fig:pd-plus-ff-results}
 \end{figure}
 
@@ -287,20 +282,6 @@ up to the start of the throw motion. However smaller errors were observed with
 the computed torque controller during the final throw motion. More specifically,
 the computed torque controller had less than $1.1$ deg of positional error and
 less than $11$ deg/s of angular velocity error.
-
-\section{Conclusion}
-This work covered the design and most of the implementation for planning and
-controlling the motion of a 6 degree of freedom UR5 robot arm to throw an object
-into a target cup. The performance of two controllers, computed torque and PD
-plus feedforward, were evaluated and it was found that the computed torque
-controller performed the best during the thrown motion. 
-
-\section{Future Work}
-Future work includes making the robot pick up an object and actually throwing it
-toward a target cup. This would likely require further tuning of the controller
-for best performance. An additional performance metrics would also include how
-close the object is to landing in the target cup, as well as the error in the
-projectile trajectory over time.
 
 \section{Challenges and Learning Outcomes}
 There were several unexpected challenges during the work of this project. ROS2
@@ -326,10 +307,21 @@ code. Additionally, it was unexpected that the assumption of only point masses
 generate torque for joint 6. Using a separate PD controller for this joint
 addressed the issue, but it did add some complexity.
 
-Finally, although I ended up doing this project individually, I originally was
-on a team that I was unhappy with. Looking back I would have rather committed to
-doing the project on my own to save more time. I would have also been more
-careful about deciding on my team members.
+\section{Conclusion}
+This work covered the design and most of the implementation for planning and
+controlling the motion of a 6 degree of freedom UR5 robot arm to throw an object
+to a target location. The performance of two controllers, computed torque and PD
+plus feedforward, were evaluated on tracking the generated trajectories, and it
+was found that the computed torque controller performed the best during the
+thrown motion.
+
+\section{Future Work}
+Future work includes making the robot pick up an object and actually throwing it
+toward a target cup. This would likely require further tuning of the controller
+for best performance. An additional performance metrics would also include how
+close the object is to landing in the target cup, as well as the error in the
+projectile trajectory over time.
+
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
